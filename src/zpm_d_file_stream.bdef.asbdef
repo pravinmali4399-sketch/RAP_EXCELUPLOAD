@@ -1,0 +1,6 @@
+abstract;
+strict ( 2 );
+with hierarchy;
+define behavior for ZPM_D_FILE_STREAM //alias <alias_name>
+{
+}

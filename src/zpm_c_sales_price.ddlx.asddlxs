@@ -1,0 +1,82 @@
+@Metadata.layer: #CORE
+annotate entity ZPM_C_SALES_PRICE with
+{
+  @UI.facet: [
+    {
+      id: 'SalesPrice',
+      purpose: #STANDARD,
+      type: #IDENTIFICATION_REFERENCE,
+      label: 'Sales Price',
+      position: 10
+    }
+  ]
+ 
+  @UI.lineItem: [
+    { position: 10, label: 'Sales Org' }
+  ]
+  @UI.identification: [
+    { position: 10, label: 'Sales Organization' }
+  ]
+ 
+  SalesOrg;
+
+  @UI.lineItem: [
+    { position: 20, label: 'Distribution Channel' }
+  ]
+  @UI.identification: [
+    { position: 20, label: 'Distribution Channel' }
+  ]
+  DistrChannel;
+
+  @UI.lineItem: [
+    { position: 30, label: 'Material' }
+  ]
+  @UI.identification: [
+    { position: 30, label: 'Material' }
+  ]
+  Material;
+
+  @UI.lineItem: [
+    { position: 40, label: 'Customer' }
+  ]
+  @UI.identification: [
+    { position: 40, label: 'Customer' }
+  ]
+  Customer;
+
+  @UI.lineItem: [
+    { position: 50, label: 'Valid From' }
+  ]
+  @UI.identification: [
+    { position: 50, label: 'Valid From' }
+  ]
+  ValidFrom;
+
+  @UI.lineItem: [
+    { position: 60, label: 'Valid To' }
+  ]
+  @UI.identification: [
+    { position: 60, label: 'Valid To' }
+  ]
+  ValidTo;
+
+  @UI.lineItem: [
+    { position: 70, label: 'Sales Price' }
+  ]
+  @UI.identification: [
+    { position: 70, label: 'Sales Price' }
+  ]
+  SalesPrice;
+
+
+    @UI.lineItem: [
+    { position: 10, label: 'Upload Excel',  type: #FOR_ACTION,
+      dataAction: 'UploadExcel' }
+  ]
+  @UI.identification: [
+    { position: 80, label: 'Currency' }
+  ]
+  Currency;
+
+
+}

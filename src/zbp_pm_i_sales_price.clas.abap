@@ -1,0 +1,5 @@
+CLASS zbp_pm_i_sales_price DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zpm_i_sales_price.
+ENDCLASS.
+
+CLASS zbp_pm_i_sales_price IMPLEMENTATION.
+ENDCLASS.

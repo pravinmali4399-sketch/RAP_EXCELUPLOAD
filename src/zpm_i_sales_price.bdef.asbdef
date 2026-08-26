@@ -1,0 +1,47 @@
+managed implementation in class zbp_pm_i_sales_price unique;
+strict ( 2 );
+with draft;
+define behavior for ZPM_I_SALES_PRICE //alias <alias_name>
+persistent table zpm_sales_price
+lock master total etag LastChangedAt
+authorization master ( instance )
+draft table zpm_d_salespr
+//etag master <field_name>
+{
+  create;
+  update;
+  delete;
+
+  static action UploadExcel deep parameter ZPM_D_UPLOAD_EXCEL ;
+
+    draft action Activate optimized;
+    draft action Discard;
+    draft action Edit;
+    draft action Resume;
+    draft determine action Prepare;
+
+  field ( readonly ) uuid,
+   CreatedBy,
+  CreatedAt,
+  LastChangedBy,
+  LastChangedAt;
+
+   field ( numbering : managed )
+   UUID;
+
+  mapping for zpm_sales_price
+    {
+      SalesOrg      = sales_org;
+      DistrChannel  = distr_channel;
+      Material      = material;
+      Customer      = customer;
+      ValidFrom     = valid_from;
+      ValidTo       = valid_to;
+      SalesPrice    = sales_price;
+      Currency      = currency;
+      CreatedBy     = created_by;
+      CreatedAt     = created_at;
+      LastChangedBy = last_changed_by;
+      LastChangedAt = last_changed_at;
+    }
+}

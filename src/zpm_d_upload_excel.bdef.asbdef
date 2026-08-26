@@ -1,0 +1,7 @@
+abstract;
+strict ( 2 );
+with hierarchy;
+define behavior for ZPM_D_UPLOAD_EXCEL //alias <alias_name>
+{
+  association _StreamProperties with hierarchy;
+}
