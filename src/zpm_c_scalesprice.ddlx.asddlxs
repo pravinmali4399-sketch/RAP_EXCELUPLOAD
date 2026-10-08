@@ -1,0 +1,25 @@
+@Metadata.layer: #CUSTOMER
+annotate entity ZPM_C_SCALESPRICE with
+{
+  @UI.facet: [
+    {
+      id: 'PriceScale',
+      purpose: #STANDARD,
+      type: #IDENTIFICATION_REFERENCE,
+      label: 'Price Scale',
+      position: 10
+    }
+  ]
+  @UI: {
+  lineItem: [ { position: 10, label: 'Minimum Quantity' } ],
+  identification: [ { position: 10, label: 'Minimum Quantity' } ]
+  }
+  MinimumQuantity;
+
+  @UI: {
+    lineItem: [ { position: 20, label: 'Scale Price' } ],
+    identification: [ { position: 20, label: 'Scale Price' } ]
+  }
+  ScalePrice;
+
+}

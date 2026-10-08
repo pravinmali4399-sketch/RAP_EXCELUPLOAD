@@ -1,47 +1,97 @@
 managed implementation in class zbp_pm_i_sales_price unique;
+
 strict ( 2 );
+
 with draft;
-define behavior for ZPM_I_SALES_PRICE //alias <alias_name>
+
+define behavior for ZPM_I_SALES_PRICE
 persistent table zpm_sales_price
 lock master total etag LastChangedAt
 authorization master ( instance )
+
 draft table zpm_d_salespr
-//etag master <field_name>
 {
   create;
   update;
   delete;
 
-  static action UploadExcel deep parameter ZPM_D_UPLOAD_EXCEL ;
+  association _Child { create; with draft; }
 
-    draft action Activate optimized;
-    draft action Discard;
-    draft action Edit;
-    draft action Resume;
-    draft determine action Prepare;
+  static action UploadExcel deep parameter ZPM_D_UPLOAD_EXCEL;
+  action ( features : instance ) Approve result [1] $self;
+
+  validation ValidDates on save { field ValidFrom, ValidTo; } //Valid-to should be greater than Validfrom
+
+  determination setValidTo on modify { field ValidFrom; } //valid-to set as 31.12 if its keep initial
+  determination setInitialApprovalStatus on modify { create; }
+
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Edit;
+  draft action Resume;
+  draft determine action Prepare { validation ValidDates; }
 
   field ( readonly ) uuid,
-   CreatedBy,
+  ApprovalStatus,
+  CreatedBy,
   CreatedAt,
   LastChangedBy,
   LastChangedAt;
 
-   field ( numbering : managed )
-   UUID;
+  field ( numbering : managed ) UUID;
 
   mapping for zpm_sales_price
     {
-      SalesOrg      = sales_org;
-      DistrChannel  = distr_channel;
-      Material      = material;
-      Customer      = customer;
-      ValidFrom     = valid_from;
-      ValidTo       = valid_to;
-      SalesPrice    = sales_price;
-      Currency      = currency;
-      CreatedBy     = created_by;
-      CreatedAt     = created_at;
-      LastChangedBy = last_changed_by;
-      LastChangedAt = last_changed_at;
+      uuid           = id;
+      SalesOrg       = sales_org;
+      DistrChannel   = distr_channel;
+      Material       = material;
+      Customer       = customer;
+      ValidFrom      = valid_from;
+      ValidTo        = valid_to;
+      SalesPrice     = sales_price;
+      Currency       = currency;
+      ApprovalStatus = approvalstatus;
+      CreatedBy      = created_by;
+      CreatedAt      = created_at;
+      LastChangedBy  = last_changed_by;
+      LastChangedAt  = last_changed_at;
+    }
+}
+
+
+define behavior for ZPM_I_SCALESPRICE
+persistent table zpm_price_scale
+draft table zpm_d_pricescale
+lock dependent by _Parent
+authorization dependent by _Parent
+{
+
+  update;
+  delete;
+
+  association _Parent { with draft; }
+
+  field ( readonly ) Id,
+  SalesPriceUuid,
+  CreatedBy,
+  CreatedAt,
+  LastChangedBy,
+  LastChangedAt;
+
+  field ( numbering : managed ) ID;
+
+  mapping for zpm_price_scale
+    {
+      ID              = id;
+      SalesPriceUUID  = sales_price_uuid;
+      MinimumQuantity = minimum_quantity;
+      Unit            = unit;
+      ScalePrice      = scale_price;
+      Currency        = currency;
+      CreatedBy       = created_by;
+      CreatedAt       = created_at;
+      LastChangedBy   = last_changed_by;
+      LastChangedAt   = last_changed_at;
     }
 }

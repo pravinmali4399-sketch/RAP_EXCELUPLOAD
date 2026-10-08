@@ -6,12 +6,20 @@ CLASS lhc_ZPM_I_SALES_PRICE DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS UploadExcel FOR MODIFY
        keys FOR ACTION zpm_i_sales_price~uploadexcel.
+    METHODS ValidDates FOR VALIDATE ON SAVE
+       keys FOR zpm_i_sales_price~ValidDates.
+    METHODS setValidTo FOR DETERMINE ON MODIFY
+       keys FOR zpm_i_sales_price~setValidTo.
+    METHODS setInitialApprovalStatus FOR DETERMINE ON MODIFY
+       keys FOR zpm_i_sales_price~setInitialApprovalStatus.
+    METHODS Approve FOR MODIFY
+       keys FOR ACTION zpm_i_sales_price~Approve RESULT result.
 
 *    METHODS get_global_authorizations FOR GLOBAL AUTHORIZATION
 *      REQUEST requested_authorizations FOR zpm_i_sales_price RESULT result.
     "!
-*    METHODS get_instance_features FOR INSTANCE FEATURES
-*      IMPORTING keys REQUEST requested_features FOR zpm_i_sales_price RESULT result.
+    METHODS get_instance_features FOR INSTANCE FEATURES
+      IMPORTING keys REQUEST requested_features FOR zpm_i_sales_price RESULT result.
 ENDCLASS.
 
 CLASS lhc_ZPM_I_SALES_PRICE IMPLEMENTATION.
@@ -27,6 +35,29 @@ CLASS lhc_ZPM_I_SALES_PRICE IMPLEMENTATION.
 **      result-%delete = if_abap_behv=>auth-allowed.
 **    ENDIF.
 *
+  ENDMETHOD.
+
+  METHOD get_instance_features.
+
+    READ ENTITIES OF zpm_i_sales_price IN LOCAL MODE
+      ENTITY zpm_i_sales_price
+      FIELDS ( ApprovalStatus )
+      WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_sales_price).
+
+    result = VALUE #(
+      FOR ls_sales_price IN lt_sales_price
+      (
+        %tky = ls_sales_price-%tky
+
+        %action-Approve = COND #(
+          WHEN ls_sales_price-ApprovalStatus = 'Approved'
+            THEN if_abap_behv=>fc-o-disabled
+          ELSE if_abap_behv=>fc-o-enabled
+        )
+      )
+    ).
+
   ENDMETHOD.
 
   METHOD UploadExcel.
@@ -224,5 +255,109 @@ CLASS lhc_ZPM_I_SALES_PRICE IMPLEMENTATION.
 *
 *  ENDMETHOD.
 
+
+  METHOD ValidDates.
+
+    READ ENTITIES OF zpm_i_sales_price IN LOCAL MODE
+     ENTITY zpm_i_sales_price
+     FIELDS ( ValidFrom ValidTo )
+     WITH CORRESPONDING #( keys )
+     RESULT DATA(lt_sales_price).
+
+    LOOP AT lt_sales_price INTO DATA(ls_sales_price).
+
+      IF ls_sales_price-ValidTo < ls_sales_price-ValidFrom.
+
+        APPEND VALUE #(
+          %tky = ls_sales_price-%tky
+          %msg = new_message_with_text(
+            severity = if_abap_behv_message=>severity-error
+            text     = 'To date cannot be earlier than From date!'
+          )
+        ) TO reported-zpm_i_sales_price.
+
+        APPEND VALUE #(
+          %tky = ls_sales_price-%tky
+        ) TO failed-zpm_i_sales_price.
+
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD setValidTo.
+
+    READ ENTITIES OF zpm_i_sales_price IN LOCAL MODE
+      ENTITY zpm_i_sales_price
+      FIELDS ( ValidFrom ValidTo )
+      WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_sales_price).
+
+    MODIFY ENTITIES OF zpm_i_sales_price IN LOCAL MODE
+      ENTITY zpm_i_sales_price
+      UPDATE FIELDS ( ValidTo )
+      WITH VALUE #(
+        FOR ls_sales_price IN lt_sales_price
+        WHERE ( ValidFrom IS NOT INITIAL AND ValidTo IS INITIAL )
+        (
+          %tky     = ls_sales_price-%tky
+          ValidTo  = COND #(
+            WHEN ls_sales_price-ValidFrom IS NOT INITIAL
+            THEN CONV d(
+              |{ ls_sales_price-ValidFrom(4) }1231|
+            )
+          )
+        )
+      ).
+
+  ENDMETHOD.
+
+  METHOD setInitialApprovalStatus.
+    READ ENTITIES OF zpm_i_sales_price IN LOCAL MODE
+      ENTITY zpm_i_sales_price
+      FIELDS ( ApprovalStatus )
+      WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_sales_price).
+
+    MODIFY ENTITIES OF zpm_i_sales_price IN LOCAL MODE
+      ENTITY zpm_i_sales_price
+      UPDATE FIELDS ( ApprovalStatus )
+      WITH VALUE #(
+        FOR ls_sales_price IN lt_sales_price
+        WHERE ( ApprovalStatus IS INITIAL )
+        (
+          %tky = ls_sales_price-%tky
+          ApprovalStatus = 'Pending'
+        )
+      ).
+  ENDMETHOD.
+
+  METHOD Approve.
+    MODIFY ENTITIES OF zpm_i_sales_price IN LOCAL MODE
+      ENTITY zpm_i_sales_price
+      UPDATE FIELDS ( ApprovalStatus )
+      WITH VALUE #(
+        FOR key IN keys
+        (
+          %tky = key-%tky
+          ApprovalStatus = 'Approved'
+        )
+      ).
+
+    READ ENTITIES OF zpm_i_sales_price IN LOCAL MODE
+      ENTITY zpm_i_sales_price
+      ALL FIELDS
+      WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_sales_price).
+
+    result = VALUE #(
+      FOR ls_sales_price IN lt_sales_price
+      (
+        %tky   = ls_sales_price-%tky
+        %param = ls_sales_price
+      )
+    ).
+  ENDMETHOD.
 
 ENDCLASS.

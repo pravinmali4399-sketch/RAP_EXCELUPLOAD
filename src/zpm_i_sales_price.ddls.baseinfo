@@ -6,7 +6,9 @@
 "ZPM_SALES_PRICE"
 ],
 "ASSOCIATED":
-[],
+[
+"ZPM_I_SCALESPRICE"
+],
 "BASE":
 [],
 "ANNO_REF":
